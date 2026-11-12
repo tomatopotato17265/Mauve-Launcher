@@ -59,9 +59,8 @@ func main() {
 		Width:  1000,
 		Height: 618,
 		Mac: application.MacWindow{
-			InvisibleTitleBarHeight: 50,
-			Backdrop:                application.MacBackdropTranslucent,
-			TitleBar:                application.MacTitleBarHiddenInset,
+			Backdrop: application.MacBackdropTranslucent,
+			TitleBar: application.MacTitleBarHiddenInset,
 		},
 		BackgroundColour: application.NewRGB(6, 7, 15),
 		URL:              "/",
