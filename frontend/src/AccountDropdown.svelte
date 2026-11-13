@@ -73,14 +73,14 @@
 
   .sign-in {
     --wails-draggable: no-drag;
-    height: 34px;
-    padding: 0 18px;
+    height: 28px;
+    padding: 0 16px;
     border: none;
     border-radius: 999px;
     background: var(--accent);
     color: #fff;
     font: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.01em;
     cursor: pointer;
@@ -101,8 +101,8 @@
     gap: 8px;
     width: 100%;
     min-width: 200px;
-    height: 34px;
-    padding: 0 10px 0 4px;
+    height: 28px;
+    padding: 0 9px 0 3px;
     border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--surface);
@@ -110,7 +110,7 @@
     backdrop-filter: blur(12px);
     color: var(--muted);
     font: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.005em;
     cursor: pointer;
@@ -136,8 +136,8 @@
   .avatar {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background:
       linear-gradient(var(--surface-solid), var(--surface-solid)) padding-box,
@@ -145,7 +145,7 @@
     border: 1.5px solid transparent;
     color: var(--accent-text);
   }
-  .avatar svg { width: 14px; height: 14px; }
+  .avatar svg { width: 12px; height: 12px; }
 
   .label {
     flex: 1;
@@ -154,8 +154,8 @@
   }
 
   .chevron {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     color: var(--subtle);
     transition: transform 0.2s ease, color 0.2s ease;
   }
