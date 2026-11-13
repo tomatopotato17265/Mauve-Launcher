@@ -1,9 +1,12 @@
 <script lang="ts">
   import {onMount} from 'svelte';
+  import {System} from '@wailsio/runtime';
   import AccountDropdown from './AccountDropdown.svelte';
+  import WindowControls from './WindowControls.svelte';
   import {AuthService, type Account} from '../bindings/changeme';
 
   let accounts = $state<Account[]>([]);
+  let os = $state('');
 
   async function loadAccounts(): Promise<void> {
     accounts = (await AuthService.GetAccounts()) ?? [];
@@ -20,10 +23,16 @@
   }
 
   onMount(() => {
+    System.Environment()
+      .then((env) => (os = env.OS))
+      .catch((err) => console.error('Reading environment failed:', err));
     loadAccounts().catch((err) => console.error('Loading accounts failed:', err));
   });
 </script>
 
-<header class="topbar">
+<header class="topbar" class:windows={os === 'windows'}>
   <AccountDropdown {accounts} onSignIn={signIn} />
+  {#if os === 'windows'}
+    <WindowControls />
+  {/if}
 </header>

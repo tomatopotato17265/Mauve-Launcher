@@ -50,3 +50,8 @@ body {
     background: var(--topbar-bg);
     border-bottom: 1px solid var(--topbar-border);
 }
+
+.topbar.windows {
+    padding-right: 0;
+    gap: 12px;
+}

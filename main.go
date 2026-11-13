@@ -4,6 +4,7 @@ import (
 	"embed"
 
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -66,6 +67,11 @@ func main() {
 		Mac: application.MacWindow{
 			Backdrop: application.MacBackdropTranslucent,
 			TitleBar: application.MacTitleBarHiddenInset,
+		},
+
+		Frameless: runtime.GOOS == "windows",
+		Windows: application.WindowsWindow{
+			WebView2CompositionHosting: true,
 		},
 		BackgroundColour: application.NewRGB(6, 7, 15),
 		URL:              "/",
