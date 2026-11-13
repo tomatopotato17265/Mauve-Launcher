@@ -1,7 +1,7 @@
 <script lang="ts">
-  import {fly} from 'svelte/transition';
+  import {slide} from 'svelte/transition';
   import {cubicOut} from 'svelte/easing';
-  import type {Account} from './accounts';
+  import type {Account} from '../bindings/changeme';
 
   let {accounts = [], onSignIn = () => {}}: {
     accounts?: Account[];
@@ -54,8 +54,7 @@
   </button>
 
   {#if open}
-    <div class="menu" role="menu" transition:fly={{y: -6, duration: 160, easing: cubicOut}}>
-      <div class="menu-label">Account</div>
+    <div class="menu" role="menu" transition:slide={{duration: 160, easing: cubicOut}}>
       <button class="item item-primary" type="button" role="menuitem" onclick={addAccount}>
         <span>Add account</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -67,6 +66,7 @@
 
 <style>
   .dropdown {
+    --dropdown-bg: rgba(27, 29, 36, 0.92);
     position: relative;
     --wails-draggable: no-drag;
   }
@@ -93,14 +93,18 @@
     outline-offset: 2px;
   }
 
+  /* Trigger and menu share one width: the trigger is at least as wide as the
+     menu, and the menu stretches to match a wider trigger (long usernames). */
   .trigger {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+    min-width: 200px;
     height: 34px;
-    padding: 0 12px 0 4px;
+    padding: 0 10px 0 4px;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 9px;
     background: var(--surface);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
@@ -121,6 +125,13 @@
     outline: 2px solid var(--accent-light);
     outline-offset: 2px;
   }
+  /* Open: the trigger and menu join into one surface. */
+  .trigger[aria-expanded='true'] {
+    background: var(--dropdown-bg);
+    border-bottom-color: transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 
   .avatar {
     display: grid;
@@ -136,6 +147,12 @@
   }
   .avatar svg { width: 14px; height: 14px; }
 
+  .label {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+  }
+
   .chevron {
     width: 14px;
     height: 14px;
@@ -147,34 +164,27 @@
 
   .menu {
     position: absolute;
-    top: calc(100% + 8px);
+    top: 100%;
+    left: 0;
     right: 0;
-    min-width: 200px;
-    padding: 6px;
-    background: rgba(27, 29, 36, 0.92);
+    padding: 0 6px 6px;
+    background: var(--dropdown-bg);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    border: 1px solid var(--accent-light);
+    border-top: none;
+    border-radius: 0 0 9px 9px;
     box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     z-index: 10;
   }
+  /* Divider between the button and the menu, spanning the full inner width. */
   .menu::before {
     content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: var(--grad);
-  }
-
-  .menu-label {
-    padding: 8px 10px 6px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--subtle);
+    display: block;
+    height: 1px;
+    margin: 0 -6px 6px;
+    background: var(--border);
   }
 
   .item {
