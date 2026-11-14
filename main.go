@@ -76,7 +76,7 @@ func main() {
 			},
 		},
 
-		Frameless: runtime.GOOS == "windows",
+		Frameless: runtime.GOOS == "windows" || runtime.GOOS == "linux",
 		Windows: application.WindowsWindow{
 			WebView2CompositionHosting: true,
 		},

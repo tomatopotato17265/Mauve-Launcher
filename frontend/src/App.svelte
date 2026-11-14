@@ -3,6 +3,7 @@
   import {System} from '@wailsio/runtime';
   import AccountDropdown from './AccountDropdown.svelte';
   import WindowControls from './WindowControls.svelte';
+  import LinuxWindowControls from './LinuxWindowControls.svelte';
   import {AuthService, type Account} from '../bindings/changeme';
 
   let accounts = $state<Account[]>([]);
@@ -30,9 +31,11 @@
   });
 </script>
 
-<header class="topbar" class:windows={os === 'windows'}>
+<header class="topbar" class:windows={os === 'windows'} class:linux={os === 'linux'}>
   <AccountDropdown {accounts} onSignIn={signIn} />
   {#if os === 'windows'}
     <WindowControls />
+  {:else if os === 'linux'}
+    <LinuxWindowControls />
   {/if}
 </header>
