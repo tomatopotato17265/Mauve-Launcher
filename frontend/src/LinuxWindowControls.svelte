@@ -2,31 +2,31 @@
   import {onMount} from 'svelte';
   import {Window} from '@wailsio/runtime';
 
-  let maximised = $state(false);
+  let maximized = $state(false);
 
-  async function syncMaximised(): Promise<void> {
-    maximised = await Window.IsMaximised();
+  async function syncMaximized(): Promise<void> {
+    maximized = await Window.IsMaximised();
   }
 
   onMount(() => {
-    syncMaximised().catch(() => {});
-    const onResize = () => syncMaximised().catch(() => {});
+    syncMaximized().catch(() => {});
+    const onResize = () => syncMaximized().catch(() => {});
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   });
 </script>
 
 <div class="controls">
-  <button class="control" type="button" aria-label="Minimise" onclick={() => Window.Minimise()}>
+  <button class="control" type="button" aria-label="Minimize" onclick={() => Window.Minimise()}>
     <svg viewBox="0 0 16 16" aria-hidden="true"><line x1="4" y1="8.5" x2="12" y2="8.5" /></svg>
   </button>
   <button
     class="control"
     type="button"
-    aria-label={maximised ? 'Restore' : 'Maximise'}
+    aria-label={maximized ? 'Restore' : 'Maximize'}
     onclick={() => Window.ToggleMaximise()}
   >
-    {#if maximised}
+    {#if maximized}
       <svg viewBox="0 0 16 16" aria-hidden="true">
         <rect x="4" y="6" width="6" height="6" rx="1" />
         <path d="M6.5 4h4.5a1 1 0 0 1 1 1v4.5" />

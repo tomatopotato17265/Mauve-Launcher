@@ -97,14 +97,14 @@ func TestNewUUID(t *testing.T) {
 
 func TestParseSignInRedirect(t *testing.T) {
 	tests := []struct {
-		url       string
-		ok        bool
-		code      string
-		cancelled bool
-		hasErr    bool
+		url      string
+		ok       bool
+		code     string
+		canceled bool
+		hasErr   bool
 	}{
 		{url: "https://login.live.com/oauth20_desktop.srf?code=M.C123&lc=1033", ok: true, code: "M.C123"},
-		{url: "https://login.live.com/oauth20_desktop.srf?error=access_denied&error_description=The+user+has+denied+access", ok: true, cancelled: true},
+		{url: "https://login.live.com/oauth20_desktop.srf?error=access_denied&error_description=The+user+has+denied+access", ok: true, canceled: true},
 		{url: "https://login.live.com/oauth20_desktop.srf?error=server_error&error_description=Oops", ok: true, hasErr: true},
 		{url: "https://login.live.com/oauth20_desktop.srf", ok: false},
 		{url: "https://login.live.com/oauth20_authorize.srf?code=nope", ok: false},
@@ -113,7 +113,7 @@ func TestParseSignInRedirect(t *testing.T) {
 	}
 	for _, tt := range tests {
 		r, ok := parseSignInRedirect(tt.url)
-		if ok != tt.ok || r.code != tt.code || r.cancelled != tt.cancelled || (r.err != nil) != tt.hasErr {
+		if ok != tt.ok || r.code != tt.code || r.canceled != tt.canceled || (r.err != nil) != tt.hasErr {
 			t.Errorf("%s: got ok=%v %+v", tt.url, ok, r)
 		}
 	}

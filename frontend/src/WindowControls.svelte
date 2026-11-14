@@ -2,31 +2,31 @@
   import {onMount} from 'svelte';
   import {Window} from '@wailsio/runtime';
 
-  let maximised = $state(false);
+  let maximized = $state(false);
 
-  async function syncMaximised(): Promise<void> {
-    maximised = await Window.IsMaximised();
+  async function syncMaximized(): Promise<void> {
+    maximized = await Window.IsMaximised();
   }
 
   onMount(() => {
-    syncMaximised().catch(() => {});
-    const onResize = () => syncMaximised().catch(() => {});
+    syncMaximized().catch(() => {});
+    const onResize = () => syncMaximized().catch(() => {});
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   });
 </script>
 
 <div class="controls">
-  <button class="control minimise" type="button" aria-label="Minimise" onclick={() => Window.Minimise()}>
+  <button class="control minimize" type="button" aria-label="Minimize" onclick={() => Window.Minimise()}>
     <span aria-hidden="true">&#xE921;</span>
   </button>
   <button
-    class="control maximise"
+    class="control maximize"
     type="button"
-    aria-label={maximised ? 'Restore' : 'Maximise'}
+    aria-label={maximized ? 'Restore' : 'Maximize'}
     onclick={() => Window.ToggleMaximise()}
   >
-    <span aria-hidden="true">{maximised ? '' : ''}</span>
+    <span aria-hidden="true">{maximized ? '' : ''}</span>
   </button>
   <button class="control close" type="button" aria-label="Close" onclick={() => Window.Close()}>
     <span aria-hidden="true">&#xE8BB;</span>
@@ -72,7 +72,7 @@
     color: #fff;
   }
 
-  .minimise { --wails-non-client-region: minimize; }
-  .maximise { --wails-non-client-region: maximize; }
+  .minimize { --wails-non-client-region: minimize; }
+  .maximize { --wails-non-client-region: maximize; }
   .close { --wails-non-client-region: close; }
 </style>

@@ -7,7 +7,6 @@ build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 
 # IDE
 .idea/*
-.vscode/*
 !.idea/runConfigurations
 
 # macOS

@@ -42,9 +42,9 @@ type Account struct {
 }
 
 type signInResult struct {
-	code      string
-	err       error
-	cancelled bool
+	code     string
+	err      error
+	canceled bool
 }
 
 // open sign-in window waiting for its result
@@ -98,7 +98,7 @@ func (s *AuthService) Login(ctx context.Context) (*Account, error) {
 	}
 
 	res := s.waitForSignIn(ctx, flow.AuthURL)
-	if res.cancelled {
+	if res.canceled {
 		return nil, nil
 	}
 	if res.err != nil {
@@ -208,7 +208,7 @@ func (s *AuthService) waitForSignIn(ctx context.Context, authURL string) signInR
 	s.mu.Unlock()
 
 	window.OnWindowEvent(events.Common.WindowClosing, func(*application.WindowEvent) {
-		wait.deliver(signInResult{cancelled: true})
+		wait.deliver(signInResult{canceled: true})
 	})
 	// Wails doesn't run WebviewWindowOptions.JS for URL windows on Windows.
 	window.OnWindowEvent(events.Windows.WebViewNavigationCompleted, func(*application.WindowEvent) {
@@ -229,7 +229,7 @@ func (s *AuthService) waitForSignIn(ctx context.Context, authURL string) signInR
 	case r := <-wait.result:
 		return r
 	case <-ctx.Done():
-		return signInResult{cancelled: true}
+		return signInResult{canceled: true}
 	case <-time.After(signInTimeout):
 		return signInResult{err: errors.New("Sign-in timed out. Please try again.")}
 	}
@@ -272,7 +272,7 @@ func parseSignInRedirect(raw string) (signInResult, bool) {
 	}
 	if e := q.Get("error"); e != "" {
 		if e == "access_denied" {
-			return signInResult{cancelled: true}, true
+			return signInResult{canceled: true}, true
 		}
 		msg := q.Get("error_description")
 		if msg == "" {
