@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
-Name=My Product
-Comment=A MauveLauncher application
+Name=Mauve Launcher
+Comment=An open-source Minecraft launcher focused on customizability and resource efficiency
 # The Exec line includes %u to pass the URL to the application
 Exec=/usr/local/bin/mauvelauncher %u
 Terminal=false

@@ -10,24 +10,24 @@
     <Installer
         Path="mauvelauncher"
         Arguments=""
-        InstallLocation="C:\Program Files\My Company\My Product">
+        InstallLocation="C:\Program Files\Mauve Launcher">
     </Installer>
     <PackageInformation
-        PackageName="My Product"
-        PackageDisplayName="My Product"
-        PublisherName="CN=My Company"
-        PublisherDisplayName="My Company"
+        PackageName="Mauve Launcher"
+        PackageDisplayName="Mauve Launcher"
+        PublisherName="CN=pencil stub
+        PublisherDisplayName="pencil stub"
         Version="0.1.0.0"
-        PackageDescription="A MauveLauncher application">
+        PackageDescription="An open-source Minecraft launcher focused on customizability and resource efficiency">
         <Capabilities>
             <Capability Name="runFullTrust" />
             
         </Capabilities>
         <Applications>
             <Application
-                Id="com.example.mauvelauncher"
-                Description="A MauveLauncher application"
-                DisplayName="My Product"
+                Id="dev.pencilstub.mauvelauncher"
+                Description="An open-source Minecraft launcher focused on customizability and resource efficiency"
+                DisplayName="Mauve Launcher"
                 ExecutableName="mauvelauncher"
                 EntryPoint="Windows.FullTrustApplication">
                 
@@ -41,9 +41,9 @@
         </Dependencies>
         <Properties>
             <Framework>false</Framework>
-            <DisplayName>My Product</DisplayName>
-            <PublisherDisplayName>My Company</PublisherDisplayName>
-            <Description>A MauveLauncher application</Description>
+            <DisplayName>Mauve Launcher</DisplayName>
+            <PublisherDisplayName>pencil stub</PublisherDisplayName>
+            <Description>An open-source Minecraft launcher focused on customizability and resource efficiency</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>

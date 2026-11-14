@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap3">
   
   <Identity 
-    Name="com.example.mauvelauncher"
-    Publisher="CN=My Company"
+    Name="dev.tomatopotato.mauvelauncher"
+    Publisher="CN=tomatopotato"
     Version="0.1.0.0" 
     ProcessorArchitecture="arm64" />
   
   <Properties>
-    <DisplayName>My Product</DisplayName>
-    <PublisherDisplayName>My Company</PublisherDisplayName>
-    <Description>A MauveLauncher application</Description>
+    <DisplayName>Mauve Launcher</DisplayName>
+    <PublisherDisplayName>tomatopotato</PublisherDisplayName>
+    <Description>An open-source Minecraft launcher focused on customizability and resource efficiency</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   
@@ -29,10 +29,10 @@
   </Resources>
   
   <Applications>
-    <Application Id="com.example.mauvelauncher" Executable="mauvelauncher" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="dev.pencilstub.mauvelauncher" Executable="mauvelauncher" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="My Product"
-        Description="A MauveLauncher application"
+        DisplayName="Mauve Launcher"
+        Description="An open-source Minecraft launcher focused on customizability and resource efficiency"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

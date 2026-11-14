@@ -38,8 +38,8 @@ func main() {
 	auth := NewAuthService()
 
 	app := application.New(application.Options{
-		Name:        "MauveLauncher",
-		Description: "A demo of using raw HTML & CSS",
+		Name:        "Mauve Launcher",
+		Description: "An open-source Minecraft launcher focused on customizability and resource efficiency",
 		Services: []application.Service{
 			application.NewService(&GreetService{}),
 			application.NewService(auth),
@@ -52,6 +52,9 @@ func main() {
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
+		Linux: application.LinuxOptions{
+			ApplicationID: "dev.pencilstub.mauvelauncher",
+		},
 	})
 
 	// Create a new window with the necessary options.
@@ -60,7 +63,7 @@ func main() {
 	// 'BackgroundColour' is the background colour of the window.
 	// 'URL' is the URL that will be loaded into the webview.
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title: "Window 1",
+		Title: "Mauve Launcher",
 		// Window sized to the golden ratio (1000 / 618 ≈ 1.618).
 		Width:  1000,
 		Height: 618,

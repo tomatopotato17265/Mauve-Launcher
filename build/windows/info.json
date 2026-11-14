@@ -5,11 +5,11 @@
 	"info": {
 		"0409": {
 			"ProductVersion": "0.1.0",
-			"CompanyName": "My Company",
-			"FileDescription": "A MauveLauncher application",
-			"LegalCopyright": "© 2026, My Company",
-			"ProductName": "My Product",
-			"Comments": "This is a comment"
+			"CompanyName": "pencil stub",
+			"FileDescription": "An open-source Minecraft launcher focused on customizability and resource efficiency",
+			"LegalCopyright": "© 2026 pencil stub",
+			"ProductName": "Mauve Launcher",
+			"Comments": "An open-source Minecraft launcher focused on customizability and resource efficiency"
 		}
 	}
 }

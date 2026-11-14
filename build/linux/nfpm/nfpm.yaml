@@ -10,10 +10,10 @@ version: "0.1.0"
 section: "default"
 priority: "extra"
 maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
-description: "A MauveLauncher application"
-vendor: "My Company"
-homepage: "https://wails.io"
-license: "MIT"
+description: "An open-source Minecraft launcher focused on customizability and resource efficiency"
+vendor: "pencil stub"
+homepage: "https://github.com/tomatopotato17265/Mauve-Launcher"
+license: "GPL-3.0-only"
 release: "1"
 
 contents:
@@ -22,7 +22,7 @@ contents:
   - src: "./build/appicon.png"
     dst: "/usr/share/icons/hicolor/128x128/apps/mauvelauncher.png"
   - src: "./build/linux/mauvelauncher.desktop"
-    dst: "/usr/share/applications/mauvelauncher.desktop"
+    dst: "/usr/share/applications/dev.tomatopotato.mauvelauncher.desktop"
 
 # Default dependencies for the GTK4 + WebKitGTK 6.0 stack (Ubuntu 24.04+ / Debian 13+)
 depends:
