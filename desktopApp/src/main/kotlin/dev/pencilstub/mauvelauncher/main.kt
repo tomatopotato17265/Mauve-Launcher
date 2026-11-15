@@ -6,20 +6,32 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.jetbrains.JBR
 import com.jetbrains.WindowDecorations.CustomTitleBar
 
 private val isMacOs = System.getProperty("os.name").startsWith("Mac", ignoreCase = true)
 
 fun main() = application {
+    val windowState = rememberWindowState()
     Window(
         onCloseRequest = ::exitApplication,
+        state = windowState,
         title = "Mauve Launcher KMP test",
     ) {
         val titleBar = if (isMacOs) remember { drawContentUnderTitleBar(window) } else null
-        App(topBarModifier = titleBar?.let { Modifier.windowDragArea(it) } ?: Modifier)
+        App(
+            topBarModifier = titleBar?.let { Modifier.windowDragArea(it) } ?: Modifier,
+            // keep the tabs clear of the traffic lights
+            topBarStartInset = when {
+                !isMacOs || windowState.placement == WindowPlacement.Fullscreen -> 0.dp
+                else -> titleBar?.leftInset?.dp ?: 80.dp
+            },
+        )
     }
 }
 
