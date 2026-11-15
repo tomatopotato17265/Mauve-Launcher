@@ -1,17 +1,25 @@
 package dev.pencilstub.mauvelauncher
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,8 +39,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mauvelauncherkmptest.shared.generated.resources.Res
+import mauvelauncherkmptest.shared.generated.resources.login
 import mauvelauncherkmptest.shared.generated.resources.nunito
+import mauvelauncherkmptest.shared.generated.resources.settings
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 
 val TopBarHeight = 40.dp
 
@@ -43,6 +54,9 @@ private val TabTrackColor = Color(0xFF1F1F1F)
 private val SelectedTabColor = Color(0xFF3A3A3A)
 private val SelectedTabTextColor = Color(0xFFFFFFFF)
 private val TabTextColor = Color(0xFFA3A3A3)
+private val AccentColor = Color(0xFF46217D)
+private val SignInTextColor = Color(0xFFFFFFFF)
+private val SettingsIconHoverColor = Color(0xFFFFFFFF)
 
 private enum class Tab { Home, Library, Discover }
 
@@ -54,7 +68,9 @@ fun App(topBarModifier: Modifier = Modifier, topBarStartInset: Dp = 0.dp) {
     Column(Modifier.fillMaxSize().background(BackgroundColor)) {
         Row(
             Modifier.fillMaxWidth().height(TopBarHeight).background(TopBarColor).then(topBarModifier)
-                .padding(start = topBarStartInset + 8.dp, top = 6.dp, bottom = 6.dp),
+                .padding(start = topBarStartInset + 8.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
                 Modifier.fillMaxHeight()
@@ -66,6 +82,9 @@ fun App(topBarModifier: Modifier = Modifier, topBarStartInset: Dp = 0.dp) {
                     TopBarTab(tab.name, selected = tab == selectedTab, onClick = { selectedTab = tab })
                 }
             }
+            Spacer(Modifier.weight(1f))
+            SettingsButton(onClick = {})
+            SignInButton(onClick = {})
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(DividerColor))
     }
@@ -73,8 +92,6 @@ fun App(topBarModifier: Modifier = Modifier, topBarStartInset: Dp = 0.dp) {
 
 @Composable
 private fun TopBarTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    val weight = FontWeight.SemiBold
-    val font = Font(Res.font.nunito, weight, variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)))
     Box(
         Modifier.fillMaxHeight()
             .clip(RoundedCornerShape(8.dp))
@@ -87,8 +104,51 @@ private fun TopBarTab(label: String, selected: Boolean, onClick: () -> Unit) {
             label,
             color = if (selected) SelectedTabTextColor else TabTextColor,
             fontSize = 15.sp,
-            fontFamily = remember(font) { FontFamily(font) },
-            fontWeight = weight,
+            fontFamily = nunitoSemiBold(),
+            fontWeight = FontWeight.SemiBold,
         )
     }
+}
+
+@Composable
+private fun SettingsButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    Icon(
+        painterResource(Res.drawable.settings),
+        contentDescription = "Settings",
+        modifier = Modifier.size(20.dp)
+            .hoverable(interactionSource)
+            .clickable(interactionSource, indication = null, role = Role.Button, onClick = onClick),
+        tint = if (hovered) SettingsIconHoverColor else TabTextColor,
+    )
+}
+
+@Composable
+private fun SignInButton(onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxHeight()
+            .clip(RoundedCornerShape(8.dp))
+            .background(AccentColor)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(start = 14.dp, end = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "Sign in",
+            color = SignInTextColor,
+            fontSize = 15.sp,
+            fontFamily = nunitoSemiBold(),
+            fontWeight = FontWeight.SemiBold,
+        )
+        Icon(painterResource(Res.drawable.login), contentDescription = null, Modifier.size(18.dp), tint = SignInTextColor)
+    }
+}
+
+@Composable
+private fun nunitoSemiBold(): FontFamily {
+    val weight = FontWeight.SemiBold
+    val font = Font(Res.font.nunito, weight, variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)))
+    return remember(font) { FontFamily(font) }
 }
