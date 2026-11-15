@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.kotlinx.coroutinesSwing)
 
     implementation(libs.compose.uiToolingPreview)
+    implementation(libs.jbr.api)
 }
 
 compose.desktop {
@@ -144,6 +145,8 @@ if (OperatingSystem.current().isMacOsX) {
         languageVersion = JavaLanguageVersion.of(21)
         vendor = JvmVendorSpec.JETBRAINS
     }
+    compose.desktop.application.javaHome = jbrLauncher.get().metadata.installationPath.asFile.absolutePath
+
     val devAppExecutable = providers.of(LiquidGlassDevApp::class) {
         // Resolved to a plain string: the configuration cache can't restore a toolchain-backed provider here.
         parameters.javaHome = jbrLauncher.get().metadata.installationPath.asFile.absolutePath
