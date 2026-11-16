@@ -62,7 +62,11 @@ private enum class Tab { Home, Library, Discover }
 
 @Composable
 @Preview
-fun App(topBarModifier: Modifier = Modifier, topBarStartInset: Dp = 0.dp) {
+fun App(
+    topBarModifier: Modifier = Modifier,
+    topBarStartInset: Dp = 0.dp,
+    onSignInClick: () -> Unit = {},
+) {
     var selectedTab by remember { mutableStateOf(Tab.Home) }
 
     Column(Modifier.fillMaxSize().background(BackgroundColor)) {
@@ -84,7 +88,7 @@ fun App(topBarModifier: Modifier = Modifier, topBarStartInset: Dp = 0.dp) {
             }
             Spacer(Modifier.weight(1f))
             SettingsButton(onClick = {})
-            SignInButton(onClick = {})
+            SignInButton(onClick = onSignInClick)
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(DividerColor))
     }

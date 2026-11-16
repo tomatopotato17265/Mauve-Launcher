@@ -7,6 +7,18 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+val jbrLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(21)
+    vendor = JvmVendorSpec.JETBRAINS
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.JETBRAINS
+    }
+}
+
 dependencies {
     implementation(project(":shared"))
 
@@ -20,6 +32,7 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "dev.pencilstub.mauvelauncher.MainKt"
+        javaHome = jbrLauncher.get().metadata.installationPath.asFile.absolutePath
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
@@ -28,23 +41,6 @@ compose.desktop {
         }
     }
 }
-
-// ---------------------------------------------------------------------------------------------------------------
-// macOS Liquid Glass
-//
-// macOS only gives an app the current (Liquid Glass) look, both the window chrome/traffic lights and the system's
-// glass rendering of the app icon, when
-//   1. its main executable was linked against the macOS 26+ SDK, and
-//   2. it runs as an .app bundle that LaunchServices recognises (otherwise there's no app icon to render).
-// A plain `java` process meets neither: every JDK's launcher is linked against an older SDK, and even from inside a
-// bundle, LaunchServices doesn't associate `java` with it when the JDK home is the bundle itself.
-//
-// Packaged builds: the jpackage launcher inside the .app is re-stamped as SDK 26 after `createDistributable`.
-// Dev runs (`run`, and the Compose Hot Reload `hot*` tasks that IntelliJ's run configuration uses): we generate a
-// small dev .app whose executable is a native launcher compiled here with the installed Xcode SDK. Like jpackage's
-// launcher, it loads libjli from an unmodified JetBrains Runtime (needed for hot reload) and calls JLI_Launch, so it
-// behaves exactly like `java`.
-// ---------------------------------------------------------------------------------------------------------------
 
 // Shell snippet that stamps the Mach-O at "$1" as built against the macOS 26 SDK
 val stampSdk26 = """
@@ -141,12 +137,6 @@ class BundledJavaLauncher(private val executable: RegularFile, private val jdk: 
 }
 
 if (OperatingSystem.current().isMacOsX) {
-    val jbrLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
-        vendor = JvmVendorSpec.JETBRAINS
-    }
-    compose.desktop.application.javaHome = jbrLauncher.get().metadata.installationPath.asFile.absolutePath
-
     val devAppExecutable = providers.of(LiquidGlassDevApp::class) {
         // Resolved to a plain string: the configuration cache can't restore a toolchain-backed provider here.
         parameters.javaHome = jbrLauncher.get().metadata.installationPath.asFile.absolutePath
