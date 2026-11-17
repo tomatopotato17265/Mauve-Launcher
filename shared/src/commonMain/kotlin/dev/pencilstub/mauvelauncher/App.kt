@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -31,20 +33,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import mauvelauncherkmptest.shared.generated.resources.Res
+import mauvelauncherkmptest.shared.generated.resources.chevron_down
 import mauvelauncherkmptest.shared.generated.resources.login
 import mauvelauncherkmptest.shared.generated.resources.nunito
+import mauvelauncherkmptest.shared.generated.resources.plus
 import mauvelauncherkmptest.shared.generated.resources.settings
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 
@@ -148,29 +162,122 @@ private fun SettingsButton(onClick: () -> Unit) {
 @Composable
 private fun AccountButton(status: AccountStatus, onClick: () -> Unit) {
     val signedIn = status is AccountStatus.SignedIn
+
+    var menuOpen by remember(signedIn) { mutableStateOf(false) }
+
+    Box(Modifier.fillMaxHeight()) {
+        Row(
+            Modifier.fillMaxHeight()
+                .clip(RoundedCornerShape(8.dp))
+                .background(if (signedIn) TabTrackColor else AccentColor)
+                .clickable(role = if (signedIn) Role.DropdownList else Role.Button) {
+                    if (signedIn) menuOpen = !menuOpen else onClick()
+                }
+                .padding(start = 14.dp, end = if (status == AccountStatus.SigningIn) 14.dp else 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                when (status) {
+                    AccountStatus.SignedOut -> "Sign in"
+                    AccountStatus.SigningIn -> "Signing in…"
+                    is AccountStatus.SignedIn -> status.playerName
+                },
+                color = SignInTextColor,
+                fontSize = 15.sp,
+                fontFamily = nunito(FontWeight.SemiBold),
+                fontWeight = FontWeight.SemiBold,
+            )
+            when (status) {
+                AccountStatus.SignedOut ->
+                    Icon(painterResource(Res.drawable.login), contentDescription = null, Modifier.size(18.dp), tint = SignInTextColor)
+                is AccountStatus.SignedIn ->
+                    Icon(
+                        painterResource(Res.drawable.chevron_down),
+                        contentDescription = null,
+                        Modifier.size(16.dp).rotate(if (menuOpen) 180f else 0f),
+                        tint = TabTextColor,
+                    )
+                AccountStatus.SigningIn -> {}
+            }
+        }
+
+        if (status is AccountStatus.SignedIn && menuOpen) {
+            AccountMenu(
+                playerName = status.playerName,
+                onDismiss = { menuOpen = false },
+                onAddAccount = {
+                    menuOpen = false
+                    onClick()
+                },
+            )
+        }
+    }
+}
+
+// opens below the account button, right edges lined up
+private class BelowAnchorEnd(private val gap: Int) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ) = IntOffset(
+        x = (anchorBounds.right - popupContentSize.width).coerceAtLeast(0),
+        y = anchorBounds.bottom + gap,
+    )
+}
+
+@Composable
+private fun AccountMenu(playerName: String, onDismiss: () -> Unit, onAddAccount: () -> Unit) {
+    val gap = with(LocalDensity.current) { 6.dp.roundToPx() }
+    val positionProvider = remember(gap) { BelowAnchorEnd(gap) }
+    Popup(positionProvider, onDismissRequest = onDismiss, properties = PopupProperties(focusable = true)) {
+        val shape = RoundedCornerShape(10.dp)
+        Column(
+            Modifier.width(IntrinsicSize.Max)
+                .widthIn(min = 200.dp)
+                .clip(shape)
+                .background(TopBarColor)
+                .border(1.dp, DividerColor, shape)
+                .padding(4.dp),
+        ) {
+            Text(
+                playerName,
+                Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                color = SignInTextColor,
+                fontSize = 15.sp,
+                fontFamily = nunito(FontWeight.SemiBold),
+                fontWeight = FontWeight.SemiBold,
+            )
+            Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(DividerColor))
+            AccountMenuItem("Add account", Res.drawable.plus, onClick = onAddAccount)
+        }
+    }
+}
+
+@Composable
+private fun AccountMenuItem(label: String, icon: DrawableResource, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
     Row(
-        Modifier.fillMaxHeight()
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (signedIn) TabTrackColor else AccentColor)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(start = 14.dp, end = if (status == AccountStatus.SignedOut) 10.dp else 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (hovered) TabTrackColor else Color.Transparent)
+            .hoverable(interactionSource)
+            .clickable(interactionSource, indication = null, role = Role.Button, onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 7.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Icon(painterResource(icon), contentDescription = null, Modifier.size(16.dp), tint = if (hovered) SignInTextColor else TabTextColor)
         Text(
-            when (status) {
-                AccountStatus.SignedOut -> "Sign in"
-                AccountStatus.SigningIn -> "Signing in…"
-                is AccountStatus.SignedIn -> status.playerName
-            },
-            color = SignInTextColor,
-            fontSize = 15.sp,
-            fontFamily = nunito(FontWeight.SemiBold),
-            fontWeight = FontWeight.SemiBold,
+            label,
+            color = if (hovered) SignInTextColor else DialogTextColor,
+            fontSize = 14.sp,
+            fontFamily = nunito(FontWeight.Medium),
+            fontWeight = FontWeight.Medium,
         )
-        if (status == AccountStatus.SignedOut) {
-            Icon(painterResource(Res.drawable.login), contentDescription = null, Modifier.size(18.dp), tint = SignInTextColor)
-        }
     }
 }
 
