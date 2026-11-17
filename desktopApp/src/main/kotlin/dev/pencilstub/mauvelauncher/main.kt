@@ -1,10 +1,8 @@
 package dev.pencilstub.mauvelauncher
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -17,14 +15,13 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jetbrains.JBR
 import com.jetbrains.WindowDecorations.CustomTitleBar
-import dev.pencilstub.mauvelauncher.auth.MicrosoftLoginFlow
-import dev.pencilstub.mauvelauncher.auth.MicrosoftLoginResult
 
 private val isMacOs = System.getProperty("os.name").startsWith("Mac", ignoreCase = true)
 
 fun main() = application {
     val windowState = rememberWindowState()
-    var signIn by remember { mutableStateOf<MicrosoftLoginFlow?>(null) }
+    val scope = rememberCoroutineScope()
+    val session = remember { SignInSession(scope) }
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
@@ -38,21 +35,19 @@ fun main() = application {
                 !isMacOs || windowState.placement == WindowPlacement.Fullscreen -> 0.dp
                 else -> titleBar?.leftInset?.dp ?: 80.dp
             },
-            onSignInClick = { signIn = MicrosoftLoginFlow.begin() },
+            accountStatus = when {
+                session.inProgress -> AccountStatus.SigningIn
+                else -> session.account?.let { AccountStatus.SignedIn(it.name) } ?: AccountStatus.SignedOut
+            },
+            onSignInClick = session::signIn,
+            signInError = session.error,
+            onDismissSignInError = { session.error = null },
         )
     }
 
-    signIn?.let { flow ->
-        key(flow) {
-            SignInWindow(flow, onClose = { result ->
-                signIn = null
-                // TODO: exchange the code for Microsoft, Xbox Live and Minecraft tokens
-                when (result) {
-                    is MicrosoftLoginResult.Success -> println("Signed in to Microsoft")
-                    is MicrosoftLoginResult.Failure -> println("Microsoft sign-in failed: $result")
-                    null -> println("Sign-in cancelled")
-                }
-            })
+    session.loginPage?.let { page ->
+        key(page) {
+            SignInWindow(page.flow, onClose = page::close)
         }
     }
 }
