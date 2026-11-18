@@ -25,7 +25,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
-        title = "Mauve Launcher KMP test",
+        title = "Mauve Launcher",
     ) {
         val titleBar = if (isMacOs) remember { drawContentUnderTitleBar(window) } else null
         App(

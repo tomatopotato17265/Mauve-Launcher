@@ -1,4 +1,4 @@
-rootProject.name = "MauveLauncherKMPtest"
+rootProject.name = "Mauve Launcher"
 
 pluginManagement {
     repositories {
