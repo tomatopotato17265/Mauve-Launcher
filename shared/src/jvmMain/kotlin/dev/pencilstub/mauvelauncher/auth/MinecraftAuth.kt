@@ -141,6 +141,7 @@ class MinecraftAuth internal constructor(private val http: HttpTransport) {
             accessToken = minecraft.accessToken,
             accessTokenExpiresAt = Instant.now().plusSeconds(minecraft.expiresIn),
             microsoftRefreshToken = microsoft.refreshToken,
+            skinUrl = profile.activeSkin?.url,
         )
     }
 
@@ -262,6 +263,7 @@ class MinecraftAccount(
     val accessToken: String,
     val accessTokenExpiresAt: Instant,
     val microsoftRefreshToken: String,
+    val skinUrl: String? = null,
 ) {
     override fun toString() = "MinecraftAccount(id=$id, name=$name)"
 }
@@ -316,4 +318,10 @@ internal class MinecraftToken(
 )
 
 @Serializable
-internal class MinecraftProfile(val id: String, val name: String)
+internal class MinecraftProfile(val id: String, val name: String, val skins: List<MinecraftSkin> = emptyList()) {
+    val activeSkin: MinecraftSkin?
+        get() = skins.firstOrNull { it.state == "ACTIVE" } ?: skins.firstOrNull()
+}
+
+@Serializable
+internal class MinecraftSkin(val url: String, val state: String = "")

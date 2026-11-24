@@ -57,6 +57,7 @@ class MinecraftAuthTest {
         assertEquals("Notch", account.name)
         assertEquals("minecraft-token", account.accessToken)
         assertEquals("msa-refresh", account.microsoftRefreshToken)
+        assertEquals("http://textures.minecraft.net/texture/new", account.skinUrl)
         assertTrue(abs(Duration.between(Instant.now().plusSeconds(86_400), account.accessTokenExpiresAt).seconds) < 60)
 
         assertEquals(
@@ -221,7 +222,7 @@ class MinecraftAuthTest {
                 SISU_AUTHORIZE -> """{"UserToken":{"Token":"user-token","NotAfter":"2099-01-01T00:00:00.0000000Z"},"TitleToken":{"Token":"title-token"}}"""
                 XSTS_AUTHORIZE -> """{"Token":"xsts-token","DisplayClaims":{"xui":[{"uhs":"user-hash"}]}}"""
                 MINECRAFT_LOGIN -> """{"username":"x","access_token":"minecraft-token","token_type":"Bearer","expires_in":86400}"""
-                MINECRAFT_PROFILE -> """{"id":"069a79f444e94726a5befca90e38aaf5","name":"Notch","skins":[],"capes":[]}"""
+                MINECRAFT_PROFILE -> """{"id":"069a79f444e94726a5befca90e38aaf5","name":"Notch","skins":[{"id":"old","state":"INACTIVE","url":"http://textures.minecraft.net/texture/old","variant":"CLASSIC"},{"id":"new","state":"ACTIVE","url":"http://textures.minecraft.net/texture/new","variant":"CLASSIC"}],"capes":[]}"""
                 else -> error("unexpected request to ${call.url}")
             }
             return HttpResult(200, headers, body)

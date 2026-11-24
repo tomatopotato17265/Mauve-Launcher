@@ -1,5 +1,6 @@
 package dev.pencilstub.mauvelauncher
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
@@ -81,7 +84,7 @@ private enum class Tab { Home, Library, Discover }
 sealed interface AccountStatus {
     data object SignedOut : AccountStatus
     data object SigningIn : AccountStatus
-    data class SignedIn(val playerName: String) : AccountStatus
+    data class SignedIn(val playerName: String, val face: ImageBitmap? = null) : AccountStatus
 }
 
 @Composable
@@ -173,10 +176,15 @@ private fun AccountButton(status: AccountStatus, onClick: () -> Unit) {
                 .clickable(role = if (signedIn) Role.DropdownList else Role.Button) {
                     if (signedIn) menuOpen = !menuOpen else onClick()
                 }
-                .padding(start = 14.dp, end = if (status == AccountStatus.SigningIn) 14.dp else 10.dp),
+                .padding(start = if (signedIn) 4.dp else 14.dp, end = if (status == AccountStatus.SigningIn) 14.dp else 10.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (status is AccountStatus.SignedIn) {
+                // inset as much from the side as from the top and bottom, corners following the button's
+                PlayerFace(status.face, size = 20.dp, cornerRadius = 4.dp)
+                Spacer(Modifier.width(2.dp))
+            }
             Text(
                 when (status) {
                     AccountStatus.SignedOut -> "Sign in"
@@ -205,6 +213,7 @@ private fun AccountButton(status: AccountStatus, onClick: () -> Unit) {
         if (status is AccountStatus.SignedIn && menuOpen) {
             AccountMenu(
                 playerName = status.playerName,
+                face = status.face,
                 onDismiss = { menuOpen = false },
                 onAddAccount = {
                     menuOpen = false
@@ -229,7 +238,7 @@ private class BelowAnchorEnd(private val gap: Int) : PopupPositionProvider {
 }
 
 @Composable
-private fun AccountMenu(playerName: String, onDismiss: () -> Unit, onAddAccount: () -> Unit) {
+private fun AccountMenu(playerName: String, face: ImageBitmap?, onDismiss: () -> Unit, onAddAccount: () -> Unit) {
     val gap = with(LocalDensity.current) { 6.dp.roundToPx() }
     val positionProvider = remember(gap) { BelowAnchorEnd(gap) }
     Popup(positionProvider, onDismissRequest = onDismiss, properties = PopupProperties(focusable = true)) {
@@ -242,17 +251,33 @@ private fun AccountMenu(playerName: String, onDismiss: () -> Unit, onAddAccount:
                 .border(1.dp, DividerColor, shape)
                 .padding(4.dp),
         ) {
-            Text(
-                playerName,
-                Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                color = SignInTextColor,
-                fontSize = 15.sp,
-                fontFamily = nunito(FontWeight.SemiBold),
-                fontWeight = FontWeight.SemiBold,
-            )
+            Row(
+                Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                PlayerFace(face, size = 32.dp, cornerRadius = 6.dp)
+                Text(
+                    playerName,
+                    color = SignInTextColor,
+                    fontSize = 15.sp,
+                    fontFamily = nunito(FontWeight.SemiBold),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
             Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(DividerColor))
             AccountMenuItem("Add account", Res.drawable.plus, onClick = onAddAccount)
         }
+    }
+}
+
+@Composable
+private fun PlayerFace(face: ImageBitmap?, size: Dp, cornerRadius: Dp) {
+    val modifier = Modifier.size(size).clip(RoundedCornerShape(cornerRadius))
+    if (face == null) {
+        Box(modifier.background(SelectedTabColor))
+    } else {
+        Image(face, contentDescription = null, modifier, filterQuality = FilterQuality.None)
     }
 }
 

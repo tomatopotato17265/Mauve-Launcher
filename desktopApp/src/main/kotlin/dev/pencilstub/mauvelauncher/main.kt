@@ -37,7 +37,7 @@ fun main() = application {
             },
             accountStatus = when {
                 session.inProgress -> AccountStatus.SigningIn
-                else -> session.account?.let { AccountStatus.SignedIn(it.name) } ?: AccountStatus.SignedOut
+                else -> session.account?.let { AccountStatus.SignedIn(it.name, session.faceOf(it)) } ?: AccountStatus.SignedOut
             },
             onSignInClick = session::signIn,
             signInError = session.error,
