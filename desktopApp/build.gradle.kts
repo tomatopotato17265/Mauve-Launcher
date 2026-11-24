@@ -19,6 +19,9 @@ kotlin {
     }
 }
 
+val iconsDir = layout.projectDirectory.dir("icons")
+val iconComposerFile: File? = iconsDir.asFile.listFiles { f -> f.isDirectory && f.extension == "icon" }?.singleOrNull()
+
 dependencies {
     implementation(project(":shared"))
 
@@ -38,9 +41,31 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "dev.pencilstub.mauvelauncher"
             packageVersion = "1.0.0"
+
+            fun icon(name: String) = iconsDir.file(name).asFile.takeIf { it.isFile }
+            macOS { icon("AppIcon.icns")?.let { iconFile.set(it) } }
+            windows { icon("AppIcon.ico")?.let { iconFile.set(it) } }
+            linux { icon("AppIcon.png")?.let { iconFile.set(it) } }
         }
     }
 }
+
+tasks.processResources {
+    from(iconsDir) { include("AppIcon.png") }
+}
+
+val compileIconFunction = """
+    compile_icon() {
+        name="$(basename "$1" .icon)"
+        out="$(mktemp -d)"
+        xcrun actool "$1" --compile "${'$'}out" --app-icon "${'$'}name" --platform macosx --target-device mac \
+            --minimum-deployment-target 11.0 --output-partial-info-plist "${'$'}out/partial.plist" >/dev/null
+        cp "${'$'}out/Assets.car" "$2/Contents/Resources/Assets.car"
+        rm -rf "${'$'}out"
+        /usr/libexec/PlistBuddy -c "Delete :CFBundleIconName" "$2/Contents/Info.plist" 2>/dev/null || true
+        /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string ${'$'}name" "$2/Contents/Info.plist"
+    }
+""".trimIndent()
 
 // Shell snippet that stamps the Mach-O at "$1" as built against the macOS 26 SDK
 val stampSdk26 = """
@@ -56,6 +81,8 @@ abstract class LiquidGlassDevApp : ValueSource<String, LiquidGlassDevApp.Params>
         val appName: Property<String>
         val bundleId: Property<String>
         val iconFile: Property<String>
+        val iconComposerFile: Property<String>
+        val compileIconFunction: Property<String>
     }
 
     @get:Inject abstract val exec: ExecOperations
@@ -67,6 +94,7 @@ abstract class LiquidGlassDevApp : ValueSource<String, LiquidGlassDevApp.Params>
         val executableName = p.appName.get().filter { it.isLetterOrDigit() }
         val executable = contents.resolve("MacOS/$executableName")
         val iconFile = p.iconFile.orNull?.let(::File)
+        val iconComposerFile = p.iconComposerFile.orNull?.let(::File)?.takeIf { it.isDirectory }
         val launcherSource = """
             #include <dlfcn.h>
             #include <stdio.h>
@@ -83,6 +111,7 @@ abstract class LiquidGlassDevApp : ValueSource<String, LiquidGlassDevApp.Params>
         """.trimIndent()
         val fingerprint = listOf(
             launcherSource, p.bundleId.get(), iconFile?.let { "${it.absolutePath}@${it.lastModified()}" },
+            iconComposerFile?.let { icon -> "${icon.absolutePath}@${icon.walk().maxOf { it.lastModified() }}" },
         ).joinToString("\n")
         val marker = contents.resolve(".liquid-glass-fingerprint")
         if (executable.isFile && marker.isFile && marker.readText() == fingerprint) return executable.absolutePath
@@ -117,6 +146,14 @@ abstract class LiquidGlassDevApp : ValueSource<String, LiquidGlassDevApp.Params>
             </plist>
             """.trimIndent()
         )
+        if (iconComposerFile != null) {
+            exec.exec {
+                commandLine(
+                    "/bin/sh", "-c", "set -eu\n${p.compileIconFunction.get()}\ncompile_icon \"$1\" \"$2\"",
+                    "sh", iconComposerFile.absolutePath, bundle.absolutePath,
+                )
+            }
+        }
         exec.exec {
             commandLine(
                 "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
@@ -144,6 +181,8 @@ if (OperatingSystem.current().isMacOsX) {
         parameters.appName = "Mauve Launcher"
         parameters.bundleId = "dev.pencilstub.mauvelauncher.dev"
         parameters.iconFile = compose.desktop.application.nativeDistributions.macOS.iconFile.map { it.asFile.absolutePath }
+        parameters.iconComposerFile = iconComposerFile?.absolutePath
+        parameters.compileIconFunction = compileIconFunction
     }
 
     // -Xdock:name: otherwise AWT names the app after its main class ("MainKt") in the Dock and menu bar.
@@ -161,16 +200,18 @@ if (OperatingSystem.current().isMacOsX) {
         jvmArgs(dockName)
     }
 
-    // The packaged .app's own launcher (from jpackage) has the same SDK problem: stamp it too, then re-sign
     tasks.matching { it.name == "createDistributable" }.configureEach {
         val appsDir = layout.buildDirectory.dir("compose/binaries/main/app").get().asFile
-        val script = "set -eu\n$stampSdk26\ncodesign --force --deep --sign - \"$2\""
+        val iconFile = iconComposerFile
+        val script = "set -eu\n$stampSdk26\n$compileIconFunction\n" +
+            "if [ -n \"$3\" ]; then compile_icon \"$3\" \"$2\"; fi\n" +
+            "codesign --force --deep --sign - \"$2\""
         doLast {
             appsDir.listFiles { f -> f.extension == "app" }!!.forEach { app ->
                 val launcher = app.resolve("Contents/MacOS").listFiles()!!.single { it.isFile && it.canExecute() }
-                val proc = ProcessBuilder("/bin/sh", "-c", script, "sh", launcher.absolutePath, app.absolutePath)
+                val proc = ProcessBuilder("/bin/sh", "-c", script, "sh", launcher.absolutePath, app.absolutePath, iconFile?.absolutePath.orEmpty())
                     .inheritIO().start()
-                check(proc.waitFor() == 0) { "Failed to stamp ${launcher.name} with the macOS 26 SDK" }
+                check(proc.waitFor() == 0) { "Failed to stamp, add the icon to, or re-sign ${app.name}" }
             }
         }
     }

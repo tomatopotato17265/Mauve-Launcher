@@ -5,6 +5,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -15,17 +18,23 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jetbrains.JBR
 import com.jetbrains.WindowDecorations.CustomTitleBar
+import javax.imageio.ImageIO
 
 private val isMacOs = System.getProperty("os.name").startsWith("Mac", ignoreCase = true)
+
+private fun loadWindowIcon(): Painter? = if (isMacOs) null else
+    object {}.javaClass.getResource("/AppIcon.png")?.let { BitmapPainter(ImageIO.read(it).toComposeImageBitmap()) }
 
 fun main() = application {
     val windowState = rememberWindowState()
     val scope = rememberCoroutineScope()
     val session = remember { SignInSession(scope) }
+    val windowIcon = remember { loadWindowIcon() }
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
         title = "Mauve Launcher",
+        icon = windowIcon,
     ) {
         val titleBar = if (isMacOs) remember { drawContentUnderTitleBar(window) } else null
         App(
