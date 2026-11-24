@@ -24,6 +24,7 @@ Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
 - Desktop tests: `./gradlew :shared:jvmTest`
 
----
+## Credits
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+- Made with [Kotlin Multiplatform](https://kotlinlang.org/multiplatform/)…
+- Logo made by **@jollylantern** on Discord
